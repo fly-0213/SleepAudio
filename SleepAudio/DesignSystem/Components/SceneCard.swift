@@ -37,7 +37,7 @@ struct SceneCard<Content: View>: View {
 struct SceneCard_Previews: PreviewProvider {
     static var previews: some View {
         SceneCard {
-            Text("Day Night Scene")
+            Text("日夜场景")
                 .font(AppTypography.title2)
         }
         .padding()

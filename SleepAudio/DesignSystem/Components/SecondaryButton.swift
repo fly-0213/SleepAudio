@@ -47,7 +47,7 @@ struct SecondaryButton_Previews: PreviewProvider {
             }
             .padding()
             .background(AppColors.morningBackground)
-            .previewDisplayName("Secondary Button")
+            .previewDisplayName("次按钮")
 
             VStack {
                 SecondaryButton(title: "停止", systemImage: "stop.fill") {}
@@ -55,7 +55,7 @@ struct SecondaryButton_Previews: PreviewProvider {
             .padding()
             .background(AppColors.nightBackground)
             .preferredColorScheme(.dark)
-            .previewDisplayName("Secondary Button Dark")
+            .previewDisplayName("次按钮 深色")
         }
     }
 }

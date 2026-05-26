@@ -54,8 +54,8 @@ struct SettingsRow_Previews: PreviewProvider {
     static var previews: some View {
         StatusCard {
             SettingsRow(
-                title: "Default sound",
-                subtitle: "Used when nothing is already playing",
+                title: "默认声音",
+                subtitle: "没有正在播放的声音时会优先使用",
                 systemImage: "waveform",
                 trailingText: "Spotify"
             )

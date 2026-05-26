@@ -41,7 +41,7 @@ struct PrimaryButton_Previews: PreviewProvider {
             }
             .padding()
             .background(AppColors.morningBackground)
-            .previewDisplayName("Primary Button")
+            .previewDisplayName("主按钮")
 
             VStack {
                 PrimaryButton(title: "我要睡了", systemImage: "moon.zzz") {}
@@ -49,7 +49,7 @@ struct PrimaryButton_Previews: PreviewProvider {
             .padding()
             .background(AppColors.nightBackground)
             .preferredColorScheme(.dark)
-            .previewDisplayName("Primary Button Dark")
+            .previewDisplayName("主按钮 深色")
         }
     }
 }

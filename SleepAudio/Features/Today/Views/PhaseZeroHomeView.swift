@@ -131,12 +131,12 @@ struct PhaseZeroHomeView_Previews: PreviewProvider {
         Group {
             PhaseZeroHomeView()
                 .environmentObject(AppState())
-                .previewDisplayName("Phase 0 Home")
+                .previewDisplayName("第零阶段首页")
 
             PhaseZeroHomeView()
                 .environmentObject(AppState())
                 .preferredColorScheme(.dark)
-                .previewDisplayName("Phase 0 Home Dark")
+                .previewDisplayName("第零阶段首页 深色")
         }
     }
 }

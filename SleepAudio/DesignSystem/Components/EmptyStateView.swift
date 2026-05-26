@@ -46,22 +46,22 @@ struct EmptyStateView_Previews: PreviewProvider {
         Group {
             EmptyStateView(
                 systemImage: "waveform",
-                title: "Sound settings are waiting",
-                message: "Your default evening and morning audio source will live here."
+                title: "声音设置还在等待",
+                message: "你的夜间与晨间默认音频来源会放在这里。"
             )
             .padding()
             .background(AppColors.morningBackground)
-            .previewDisplayName("Empty State")
+            .previewDisplayName("空状态")
 
             EmptyStateView(
                 systemImage: "moon.stars",
-                title: "Quietly ready",
-                message: "This state keeps the interface calm before real content arrives."
+                title: "已经安静准备好",
+                message: "在真实内容到来之前，界面会先保持轻盈和安静。"
             )
             .padding()
             .background(AppColors.nightBackground)
             .preferredColorScheme(.dark)
-            .previewDisplayName("Empty State Dark")
+            .previewDisplayName("空状态 深色")
         }
     }
 }

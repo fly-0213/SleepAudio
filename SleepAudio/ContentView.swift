@@ -19,13 +19,13 @@ struct ContentView_Previews: PreviewProvider {
             ContentView()
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
-                .previewDisplayName("Content View")
+                .previewDisplayName("主界面")
 
             ContentView()
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
                 .preferredColorScheme(.dark)
-                .previewDisplayName("Content View Dark")
+                .previewDisplayName("主界面 深色")
         }
     }
 }

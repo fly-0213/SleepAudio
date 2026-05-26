@@ -96,13 +96,13 @@ struct MainTabView_Previews: PreviewProvider {
             MainTabView()
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
-                .previewDisplayName("Main Tabs")
+                .previewDisplayName("主标签")
 
             MainTabView()
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
                 .preferredColorScheme(.dark)
-                .previewDisplayName("Main Tabs Dark")
+                .previewDisplayName("主标签 深色")
         }
     }
 }

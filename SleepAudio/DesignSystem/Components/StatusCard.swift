@@ -47,7 +47,7 @@ struct StatusCard_Previews: PreviewProvider {
             }
             .padding()
             .background(AppColors.morningBackground)
-            .previewDisplayName("Status Card")
+            .previewDisplayName("状态卡片")
 
             StatusCard {
                 VStack(alignment: .leading, spacing: AppSpacing.xs) {
@@ -61,7 +61,7 @@ struct StatusCard_Previews: PreviewProvider {
             .padding()
             .background(AppColors.nightBackground)
             .preferredColorScheme(.dark)
-            .previewDisplayName("Status Card Dark")
+            .previewDisplayName("状态卡片 深色")
         }
     }
 }

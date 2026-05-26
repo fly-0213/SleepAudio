@@ -20,8 +20,8 @@ struct RecordsView: View {
                     StatusCard {
                         EmptyStateView(
                             systemImage: "clock",
-                            title: "No sound records yet",
-                            message: "After a night session, you will see when sound paused and when morning audio returned.",
+                            title: "还没有声音记录",
+                            message: "完成一次夜间守候后，你会看到声音何时停下、早晨又何时回来。",
                             accentColor: AppColors.successSoft
                         )
                     }
@@ -31,17 +31,17 @@ struct RecordsView: View {
                 .padding(.bottom, AppSpacing.xxl)
             }
         }
-        .navigationTitle("Records")
+        .navigationTitle("记录")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: AppSpacing.xs) {
-            Text("Records")
+            Text("记录")
                 .font(AppTypography.display)
                 .foregroundStyle(AppColors.primaryText(for: colorScheme))
 
-            Text("A quiet log of how sound cared for your night.")
+            Text("一份安静的记录，留下声音陪伴夜晚的方式。")
                 .font(AppTypography.body)
                 .foregroundStyle(AppColors.secondaryText(for: colorScheme))
         }

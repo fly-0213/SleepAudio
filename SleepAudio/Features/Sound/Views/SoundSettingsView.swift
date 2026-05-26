@@ -20,8 +20,8 @@ struct SoundSettingsView: View {
                     StatusCard {
                         EmptyStateView(
                             systemImage: "waveform",
-                            title: "Sound settings are waiting",
-                            message: "Your default audio app, gentle morning fade, and night pause preferences will appear here.",
+                            title: "声音设置还在等待",
+                            message: "默认音频来源、晨间渐入和夜间暂停偏好，之后都会放在这里。",
                             accentColor: AppColors.accentCalmBlue
                         )
                     }
@@ -31,17 +31,17 @@ struct SoundSettingsView: View {
                 .padding(.bottom, AppSpacing.xxl)
             }
         }
-        .navigationTitle("Sound")
+        .navigationTitle("声音")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: AppSpacing.xs) {
-            Text("Sound")
+            Text("声音")
                 .font(AppTypography.display)
                 .foregroundStyle(AppColors.primaryText(for: colorScheme))
 
-            Text("Choose what gently fills the room.")
+            Text("选择让房间轻轻响起的声音。")
                 .font(AppTypography.body)
                 .foregroundStyle(AppColors.secondaryText(for: colorScheme))
         }

@@ -24,17 +24,17 @@ struct SettingsView: View {
                 .padding(.bottom, AppSpacing.xxl)
             }
         }
-        .navigationTitle("Settings")
+        .navigationTitle("设置")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: AppSpacing.xs) {
-            Text("Settings")
+            Text("设置")
                 .font(AppTypography.display)
                 .foregroundStyle(AppColors.primaryText(for: colorScheme))
 
-            Text("Keep the experience calm and personal.")
+            Text("让体验保持安静，也更贴近你。")
                 .font(AppTypography.body)
                 .foregroundStyle(AppColors.secondaryText(for: colorScheme))
         }
@@ -44,10 +44,10 @@ struct SettingsView: View {
         StatusCard {
             VStack(spacing: 0) {
                 SettingsRow(
-                    title: "Companion",
-                    subtitle: "Appearance and tone",
+                    title: "陪伴形象",
+                    subtitle: "外观与语气",
                     systemImage: "person.crop.circle",
-                    trailingText: "Soon"
+                    trailingText: "稍后"
                 )
 
                 Divider()
@@ -55,9 +55,9 @@ struct SettingsView: View {
 
                 SettingsRow(
                     title: "Apple Watch",
-                    subtitle: "Connection and permissions",
+                    subtitle: "连接与权限",
                     systemImage: "applewatch",
-                    trailingText: "Mock"
+                    trailingText: "模拟"
                 )
             }
         }
@@ -67,8 +67,8 @@ struct SettingsView: View {
         StatusCard {
             EmptyStateView(
                 systemImage: "gearshape",
-                title: "Settings will grow carefully",
-                message: "Future controls for companion style, permissions, and gentle safeguards will live here.",
+                title: "设置会慢慢长出来",
+                message: "陪伴形象、权限说明和温和的误触发保护，之后都会放在这里。",
                 accentColor: AppColors.accentMorning
             )
         }

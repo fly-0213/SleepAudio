@@ -16,13 +16,13 @@ enum AppTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .today:
-            "Today"
+            "今日"
         case .sound:
-            "Sound"
+            "声音"
         case .records:
-            "Records"
+            "记录"
         case .settings:
-            "Settings"
+            "设置"
         }
     }
 
