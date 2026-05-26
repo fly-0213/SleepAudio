@@ -20,7 +20,7 @@ struct SleepSession: Identifiable, Equatable, Codable {
         endedAt: Date? = nil,
         audioSource: AudioSource,
         detectionState: SleepDetectionState = .preparing,
-        playbackState: PlaybackState = .mockPlaying,
+        playbackState: PlaybackState = .playing,
         pausedAt: Date? = nil
     ) {
         self.id = id

@@ -38,22 +38,44 @@ struct TodayView: View {
                         isResting: viewModel.isResting
                     )
 
-                    SleepActionPanel(
-                        defaultAudioSource: appState.selectedAudioSource.displayName,
-                        morningFadeIn: appState.morningPlaybackSettings.fadeInDuration.displayName,
-                        nightPauseMode: appState.nightPauseSettings.timingPreference.displayName,
-                        statusTitle: viewModel.sleepDetectionState == .idle ? nil : viewModel.statusTitle,
-                        statusMessage: viewModel.sleepDetectionState == .idle ? nil : viewModel.statusMessage,
-                        resultTitle: viewModel.resultTitle,
-                        buttonTitle: viewModel.primaryButtonTitle,
-                        buttonIcon: viewModel.primaryButtonIcon,
-                        isPrimaryDisabled: viewModel.shouldDisablePrimaryButton,
-                        endButtonTitle: viewModel.shouldShowEndButton ? "结束守候" : nil
-                    ) {
-                        handlePrimaryAction()
-                    } endAction: {
-                        withAnimation(.easeInOut(duration: 0.22)) {
-                            viewModel.endNightFlow()
+                    if viewModel.isMorningPlaybackVisible {
+                        MorningPlaybackPanel(
+                            audioSourceName: viewModel.morningAudioSource?.displayName ?? appState.selectedAudioSource.displayName,
+                            playbackState: viewModel.morningPlaybackState,
+                            currentVolume: viewModel.mockMorningVolume,
+                            targetVolume: viewModel.morningTargetVolume,
+                            progress: viewModel.morningVolumeProgress
+                        ) {
+                            withAnimation(.easeInOut(duration: 0.22)) {
+                                viewModel.reduceMorningVolume()
+                            }
+                        } stopAction: {
+                            withAnimation(.easeInOut(duration: 0.22)) {
+                                viewModel.stopMorningPlayback()
+                            }
+                        } dismissAction: {
+                            withAnimation(.easeInOut(duration: 0.22)) {
+                                viewModel.resetToIdle()
+                            }
+                        }
+                    } else {
+                        SleepActionPanel(
+                            defaultAudioSource: appState.selectedAudioSource.displayName,
+                            morningFadeIn: appState.morningPlaybackSettings.fadeInDuration.displayName,
+                            nightPauseMode: appState.nightPauseSettings.timingPreference.displayName,
+                            statusTitle: viewModel.sleepDetectionState == .idle ? nil : viewModel.statusTitle,
+                            statusMessage: viewModel.sleepDetectionState == .idle ? nil : viewModel.statusMessage,
+                            resultTitle: viewModel.resultTitle,
+                            buttonTitle: viewModel.primaryButtonTitle,
+                            buttonIcon: viewModel.primaryButtonIcon,
+                            isPrimaryDisabled: viewModel.shouldDisablePrimaryButton,
+                            endButtonTitle: viewModel.shouldShowEndButton ? "结束守候" : nil
+                        ) {
+                            handlePrimaryAction()
+                        } endAction: {
+                            withAnimation(.easeInOut(duration: 0.22)) {
+                                viewModel.endNightFlow()
+                            }
                         }
                     }
                 }
@@ -71,8 +93,20 @@ struct TodayView: View {
             if viewModel.sleepDetectionState == .ended {
                 viewModel.resetToIdle()
             } else {
-                viewModel.startNightFlow(audioSource: appState.selectedAudioSource)
+                viewModel.startNightFlow(
+                    audioSource: appState.selectedAudioSource,
+                    targetMorningVolume: appState.morningPlaybackSettings.targetVolume
+                )
             }
+        }
+    }
+
+    private func triggerMorningPlaybackForTesting() {
+        withAnimation(.easeInOut(duration: 0.22)) {
+            viewModel.triggerMorningPlaybackForTesting(
+                audioSource: appState.selectedAudioSource,
+                targetVolume: appState.morningPlaybackSettings.targetVolume
+            )
         }
     }
 
@@ -97,6 +131,9 @@ struct TodayView: View {
                 .frame(width: 44, height: 44)
                 .background(AppColors.cardBackground(for: colorScheme))
                 .clipShape(Circle())
+                .onLongPressGesture(minimumDuration: 0.8) {
+                    triggerMorningPlaybackForTesting()
+                }
         }
     }
 }

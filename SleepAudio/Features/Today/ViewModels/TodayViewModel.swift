@@ -11,10 +11,17 @@ final class TodayViewModel: ObservableObject {
     @Published private(set) var mode: AppMode
     @Published private(set) var sleepDetectionState: SleepDetectionState = .idle
     @Published private(set) var currentSession: SleepSession?
+    @Published private(set) var morningPlaybackState: PlaybackState = .idle
+    @Published private(set) var mockMorningVolume = 0.0
+    @Published private(set) var morningTargetVolume = MorningPlaybackSettings.default.targetVolume
+    @Published private(set) var morningAudioSource: AudioSource?
 
     private let sleepDetectionService: any SleepDetecting
     private let audioManager: any AudioManaging
     private var nightFlowTask: Task<Void, Never>?
+    private var morningFlowTask: Task<Void, Never>?
+    private var hasStoppedMorningPlaybackToday = false
+    private var hasAutoTriggeredMorningToday = false
 
     init(
         date: Date = Date(),
@@ -29,9 +36,10 @@ final class TodayViewModel: ObservableObject {
 
     deinit {
         nightFlowTask?.cancel()
+        morningFlowTask?.cancel()
     }
 
-    func startNightFlow(audioSource: AudioSource) {
+    func startNightFlow(audioSource: AudioSource, targetMorningVolume: Double) {
         guard !sleepDetectionState.isNightFlowActive else { return }
 
         let session = SleepSession(audioSource: audioSource)
@@ -51,6 +59,12 @@ final class TodayViewModel: ObservableObject {
 
                 let playbackState = try await self.audioManager.pauseAudio(from: audioSource)
                 self.markAudioPaused(playbackState)
+                try await Task.sleep(nanoseconds: 1_600_000_000)
+                self.startMorningPlaybackIfAllowed(
+                    audioSource: audioSource,
+                    targetVolume: targetMorningVolume,
+                    isAutomatic: true
+                )
             } catch is CancellationError {
                 return
             } catch {
@@ -68,107 +82,60 @@ final class TodayViewModel: ObservableObject {
     func resetToIdle() {
         nightFlowTask?.cancel()
         nightFlowTask = nil
+        morningFlowTask?.cancel()
+        morningFlowTask = nil
         currentSession = nil
         sleepDetectionState = .idle
-    }
-
-    var isResting: Bool {
-        sleepDetectionState.isNightFlowActive || sleepDetectionState == .ended
-    }
-
-    var companionSpeech: String {
-        sleepDetectionState.companionSpeech ?? mode.companionSpeech
-    }
-
-    var sceneMode: AppMode {
-        sleepDetectionState == .idle ? mode : .lateNight
-    }
-
-    var headerTitle: String {
-        switch sleepDetectionState {
-        case .idle:
-            mode.title
-        case .preparing:
-            "晚安，我会安静陪着你"
-        case .guarding:
-            "正在安静守候"
-        case .likelyAsleep:
-            "可能已经睡着了"
-        case .paused:
-            "昨晚声音已停下"
-        case .ended:
-            "今晚先回到安静"
+        if morningPlaybackState == .stopped {
+            morningPlaybackState = .idle
+            mockMorningVolume = 0
+            morningAudioSource = nil
         }
     }
 
-    var headerSubtitle: String {
-        switch sleepDetectionState {
-        case .idle:
-            mode.subtitle
-        case .preparing:
-            "正在为夜晚准备一个轻一点的状态"
-        case .guarding:
-            "如果你睡着了，我会帮你停下声音"
-        case .likelyAsleep:
-            "正在模拟暂停当前声音"
-        case .paused:
-            "声音已为你停下，可以安心休息了"
-        case .ended:
-            "守候已经结束，需要时可以再次开始"
+    func triggerMorningPlaybackForTesting(audioSource: AudioSource, targetVolume: Double) {
+        startMorningPlaybackIfAllowed(
+            audioSource: audioSource,
+            targetVolume: targetVolume,
+            isAutomatic: false
+        )
+    }
+
+    func reduceMorningVolume() {
+        guard morningPlaybackState == .fadingIn || morningPlaybackState == .playing else { return }
+
+        morningFlowTask?.cancel()
+        morningFlowTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let reducedVolume = try await self.audioManager.reduceVolume(currentVolume: self.mockMorningVolume)
+                self.morningTargetVolume = max(reducedVolume, 0.10)
+                self.mockMorningVolume = min(reducedVolume, self.morningTargetVolume)
+                self.morningPlaybackState = self.mockMorningVolume >= self.morningTargetVolume
+                    ? .playing
+                    : .fadingIn
+            } catch {
+                self.morningPlaybackState = .stopped
+            }
         }
     }
 
-    var primaryButtonTitle: String {
-        switch sleepDetectionState {
-        case .idle:
-            "我要睡了"
-        case .preparing, .guarding, .likelyAsleep:
-            "守候中"
-        case .paused:
-            "昨晚声音已停下"
-        case .ended:
-            "回到今日"
+    func stopMorningPlayback() {
+        morningFlowTask?.cancel()
+        morningFlowTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                self.morningPlaybackState = try await self.audioManager.stopPlayback()
+            } catch {
+                self.morningPlaybackState = .stopped
+            }
+
+            self.mockMorningVolume = 0
+            self.hasStoppedMorningPlaybackToday = true
+            self.hasAutoTriggeredMorningToday = true
         }
-    }
-
-    var primaryButtonIcon: String {
-        switch sleepDetectionState {
-        case .idle:
-            "moon.zzz"
-        case .preparing, .guarding:
-            "shield.lefthalf.filled"
-        case .likelyAsleep:
-            "moon.zzz.fill"
-        case .paused:
-            "checkmark"
-        case .ended:
-            "sunrise"
-        }
-    }
-
-    var shouldDisablePrimaryButton: Bool {
-        switch sleepDetectionState {
-        case .preparing, .guarding, .likelyAsleep, .paused:
-            true
-        case .idle, .ended:
-            false
-        }
-    }
-
-    var shouldShowEndButton: Bool {
-        sleepDetectionState.isNightFlowActive
-    }
-
-    var statusTitle: String {
-        sleepDetectionState.statusTitle
-    }
-
-    var statusMessage: String {
-        sleepDetectionState.statusMessage
-    }
-
-    var resultTitle: String? {
-        sleepDetectionState == .paused ? "昨晚声音已停下" : nil
     }
 
     private func updateDetectionState(_ state: SleepDetectionState) {
@@ -185,5 +152,53 @@ final class TodayViewModel: ObservableObject {
     private func markFlowEnded() {
         currentSession?.endedAt = Date()
         updateDetectionState(.ended)
+    }
+
+    private func startMorningPlaybackIfAllowed(
+        audioSource: AudioSource,
+        targetVolume: Double,
+        isAutomatic: Bool
+    ) {
+        guard !hasStoppedMorningPlaybackToday else { return }
+        guard morningPlaybackState == .idle || morningPlaybackState == .stopped else { return }
+
+        if isAutomatic {
+            guard !hasAutoTriggeredMorningToday else { return }
+            hasAutoTriggeredMorningToday = true
+        }
+
+        morningFlowTask?.cancel()
+        morningAudioSource = audioSource
+        morningTargetVolume = min(max(targetVolume, 0.10), 1.0)
+        mockMorningVolume = 0
+        morningPlaybackState = .fadingIn
+        sleepDetectionState = .ended
+
+        morningFlowTask = Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                self.morningPlaybackState = try await self.audioManager.startMorningPlayback(
+                    from: audioSource,
+                    targetVolume: self.morningTargetVolume
+                )
+
+                let steps = 24
+                for step in 1...steps {
+                    try Task.checkCancellation()
+                    try await Task.sleep(nanoseconds: 140_000_000)
+
+                    let nextVolume = self.morningTargetVolume * (Double(step) / Double(steps))
+                    self.mockMorningVolume = try await self.audioManager.updateMockVolume(nextVolume)
+                }
+
+                self.mockMorningVolume = self.morningTargetVolume
+                self.morningPlaybackState = .playing
+            } catch is CancellationError {
+                return
+            } catch {
+                self.morningPlaybackState = .stopped
+            }
+        }
     }
 }
