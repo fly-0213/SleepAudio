@@ -15,6 +15,7 @@ struct SleepAudioApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(container.appState)
+                .environmentObject(container.router)
         }
     }
 }

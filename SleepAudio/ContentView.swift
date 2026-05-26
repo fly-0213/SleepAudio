@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        PhaseZeroHomeView()
+        MainTabView()
     }
 }
 
@@ -18,10 +18,12 @@ struct ContentView_Previews: PreviewProvider {
         Group {
             ContentView()
                 .environmentObject(AppState())
+                .environmentObject(AppRouter())
                 .previewDisplayName("Content View")
 
             ContentView()
                 .environmentObject(AppState())
+                .environmentObject(AppRouter())
                 .preferredColorScheme(.dark)
                 .previewDisplayName("Content View Dark")
         }
