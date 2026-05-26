@@ -6,6 +6,8 @@
 import SwiftUI
 
 struct RecordsView: View {
+    @StateObject private var viewModel = RecordsViewModel()
+    @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -17,13 +19,10 @@ struct RecordsView: View {
                 VStack(alignment: .leading, spacing: AppSpacing.xl) {
                     header
 
-                    StatusCard {
-                        EmptyStateView(
-                            systemImage: "clock",
-                            title: "还没有声音记录",
-                            message: "完成一次夜间守候后，你会看到声音何时停下、早晨又何时回来。",
-                            accentColor: AppColors.successSoft
-                        )
+                    if viewModel.records.isEmpty {
+                        emptyState
+                    } else {
+                        recordsList
                     }
                 }
                 .padding(.horizontal, AppSpacing.pageHorizontal)
@@ -33,6 +32,12 @@ struct RecordsView: View {
         }
         .navigationTitle("记录")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.update(records: appState.sessionRecords)
+        }
+        .onChange(of: appState.sessionRecords) { _, records in
+            viewModel.update(records: records)
+        }
     }
 
     private var header: some View {
@@ -46,6 +51,31 @@ struct RecordsView: View {
                 .foregroundStyle(AppColors.secondaryText(for: colorScheme))
         }
     }
+
+    private var emptyState: some View {
+        StatusCard {
+            EmptyStateView(
+                systemImage: "clock",
+                title: "这里将慢慢记录你的每一个夜晚",
+                message: "完成一次夜间守候后，你会看到声音何时停下、早晨又何时回来。",
+                accentColor: AppColors.successSoft
+            )
+        }
+    }
+
+    private var recordsList: some View {
+        VStack(spacing: AppSpacing.md) {
+            ForEach(viewModel.records) { record in
+                RecordCardView(
+                    record: record,
+                    dateText: viewModel.dateText(for: record),
+                    guardedDurationText: viewModel.guardedDurationText(for: record),
+                    morningDurationText: viewModel.morningDurationText(for: record),
+                    resultText: viewModel.resultText(for: record)
+                )
+            }
+        }
+    }
 }
 
 struct RecordsView_Previews: PreviewProvider {
@@ -54,10 +84,12 @@ struct RecordsView_Previews: PreviewProvider {
             NavigationStack {
                 RecordsView()
             }
+            .environmentObject(AppState())
 
             NavigationStack {
                 RecordsView()
             }
+            .environmentObject(AppState())
             .preferredColorScheme(.dark)
         }
     }

@@ -13,16 +13,23 @@ final class AppState: ObservableObject {
     @Published private(set) var selectedAudioSource: AudioSource
     @Published private(set) var morningPlaybackSettings: MorningPlaybackSettings
     @Published private(set) var nightPauseSettings: NightPauseSettings
+    @Published private(set) var sessionRecords: [SessionRecord]
 
     private let settingsStore: SettingsStore
+    private let sessionHistoryStore: SessionHistoryStore
 
-    init(settingsStore: SettingsStore = SettingsStore()) {
+    init(
+        settingsStore: SettingsStore = SettingsStore(),
+        sessionHistoryStore: SessionHistoryStore = SessionHistoryStore()
+    ) {
         self.settingsStore = settingsStore
+        self.sessionHistoryStore = sessionHistoryStore
         hasCompletedOnboarding = settingsStore.hasCompletedOnboarding
         selectedCompanionProfile = settingsStore.selectedCompanionProfile
         selectedAudioSource = settingsStore.selectedAudioSource
         morningPlaybackSettings = settingsStore.morningPlaybackSettings
         nightPauseSettings = settingsStore.nightPauseSettings
+        sessionRecords = sessionHistoryStore.loadRecords()
     }
 
     func selectCompanionProfile(_ profile: CompanionProfile) {
@@ -61,5 +68,19 @@ final class AppState: ObservableObject {
     func updateNightPauseTiming(_ timing: NightPauseSettings.TimingPreference) {
         nightPauseSettings.timingPreference = timing
         settingsStore.nightPauseSettings = nightPauseSettings
+    }
+
+    var latestSessionRecord: SessionRecord? {
+        sessionRecords.first
+    }
+
+    func upsertSessionRecord(_ record: SessionRecord) {
+        sessionHistoryStore.upsert(record)
+        sessionRecords = sessionHistoryStore.loadRecords()
+    }
+
+    func clearSessionHistoryForDebug() {
+        sessionHistoryStore.clearHistory()
+        sessionRecords = []
     }
 }

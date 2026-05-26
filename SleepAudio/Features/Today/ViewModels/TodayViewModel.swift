@@ -15,6 +15,7 @@ final class TodayViewModel: ObservableObject {
     @Published private(set) var mockMorningVolume = 0.0
     @Published private(set) var morningTargetVolume = MorningPlaybackSettings.default.targetVolume
     @Published private(set) var morningAudioSource: AudioSource?
+    @Published private(set) var pendingSessionRecord: SessionRecord?
 
     private let sleepDetectionService: any SleepDetecting
     private let audioManager: any AudioManaging
@@ -41,6 +42,12 @@ final class TodayViewModel: ObservableObject {
 
     func startNightFlow(audioSource: AudioSource, targetMorningVolume: Double) {
         guard !sleepDetectionState.isNightFlowActive else { return }
+
+        hasStoppedMorningPlaybackToday = false
+        hasAutoTriggeredMorningToday = false
+        morningPlaybackState = .idle
+        mockMorningVolume = 0
+        morningAudioSource = nil
 
         let session = SleepSession(audioSource: audioSource)
         currentSession = session
@@ -135,23 +142,31 @@ final class TodayViewModel: ObservableObject {
             self.mockMorningVolume = 0
             self.hasStoppedMorningPlaybackToday = true
             self.hasAutoTriggeredMorningToday = true
+            self.currentSession?.playbackState = .stopped
+            self.currentSession?.morningPlaybackEndedAt = Date()
+            self.publishCurrentRecord()
         }
     }
 
     private func updateDetectionState(_ state: SleepDetectionState) {
         sleepDetectionState = state
         currentSession?.detectionState = state
+        if state == .likelyAsleep {
+            currentSession?.estimatedSleepAt = Date()
+        }
     }
 
     private func markAudioPaused(_ playbackState: PlaybackState) {
         currentSession?.playbackState = playbackState
         currentSession?.pausedAt = Date()
         updateDetectionState(.paused)
+        publishCurrentRecord()
     }
 
     private func markFlowEnded() {
         currentSession?.endedAt = Date()
         updateDetectionState(.ended)
+        publishCurrentRecord()
     }
 
     private func startMorningPlaybackIfAllowed(
@@ -173,6 +188,10 @@ final class TodayViewModel: ObservableObject {
         mockMorningVolume = 0
         morningPlaybackState = .fadingIn
         sleepDetectionState = .ended
+        currentSession?.wakeAt = Date()
+        currentSession?.morningPlaybackStartedAt = Date()
+        currentSession?.playbackState = .fadingIn
+        publishCurrentRecord()
 
         morningFlowTask = Task { [weak self] in
             guard let self else { return }
@@ -194,11 +213,20 @@ final class TodayViewModel: ObservableObject {
 
                 self.mockMorningVolume = self.morningTargetVolume
                 self.morningPlaybackState = .playing
+                self.currentSession?.playbackState = .playing
+                self.publishCurrentRecord()
             } catch is CancellationError {
                 return
             } catch {
                 self.morningPlaybackState = .stopped
+                self.currentSession?.playbackState = .stopped
+                self.currentSession?.morningPlaybackEndedAt = Date()
+                self.publishCurrentRecord()
             }
         }
+    }
+
+    private func publishCurrentRecord() {
+        pendingSessionRecord = currentSession?.sessionRecord
     }
 }

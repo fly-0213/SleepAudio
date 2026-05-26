@@ -38,6 +38,10 @@ struct TodayView: View {
                         isResting: viewModel.isResting
                     )
 
+                    if let latestRecord = appState.latestSessionRecord {
+                        recentRecordSummary(latestRecord)
+                    }
+
                     if viewModel.isMorningPlaybackVisible {
                         MorningPlaybackPanel(
                             audioSourceName: viewModel.morningAudioSource?.displayName ?? appState.selectedAudioSource.displayName,
@@ -86,6 +90,10 @@ struct TodayView: View {
         }
             .navigationTitle("今日")
             .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: viewModel.pendingSessionRecord) { _, record in
+                guard let record else { return }
+                appState.upsertSessionRecord(record)
+            }
     }
 
     private func handlePrimaryAction() {
@@ -135,6 +143,44 @@ struct TodayView: View {
                     triggerMorningPlaybackForTesting()
                 }
         }
+    }
+
+    private func recentRecordSummary(_ record: SessionRecord) -> some View {
+        StatusCard {
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                HStack(spacing: AppSpacing.sm) {
+                    Image(systemName: "clock.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(AppColors.successSoft)
+                        .frame(width: 28, height: 28)
+                        .background(AppColors.successSoft.opacity(colorScheme == .dark ? 0.16 : 0.12))
+                        .clipShape(Circle())
+
+                    VStack(alignment: .leading, spacing: AppSpacing.xxs) {
+                        Text("最近一次守候")
+                            .font(AppTypography.headline)
+                            .foregroundStyle(AppColors.primaryText(for: colorScheme))
+
+                        Text(recentRecordSubtitle(record))
+                            .font(AppTypography.bodySmall)
+                            .foregroundStyle(AppColors.secondaryText(for: colorScheme))
+                    }
+
+                    Spacer(minLength: AppSpacing.sm)
+                }
+            }
+        }
+    }
+
+    private func recentRecordSubtitle(_ record: SessionRecord) -> String {
+        let guardedMinutes = max(Int((record.guardedDuration / 60).rounded()), 1)
+
+        if let morningDuration = record.morningPlaybackDuration {
+            let morningMinutes = max(Int((morningDuration / 60).rounded()), 1)
+            return "昨晚已守候 \(guardedMinutes) 分钟，清晨播放 \(morningMinutes) 分钟"
+        }
+
+        return "昨晚已守候 \(guardedMinutes) 分钟"
     }
 }
 

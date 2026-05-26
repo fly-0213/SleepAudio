@@ -20,6 +20,7 @@ struct SettingsView: View {
                     settingsPlaceholder
                     emptyState
                     debugResetButton
+                    debugClearHistoryButton
                 }
                 .padding(.horizontal, AppSpacing.pageHorizontal)
                 .padding(.top, AppSpacing.lg)
@@ -81,6 +82,19 @@ struct SettingsView: View {
             appState.resetOnboardingForDebug()
         } label: {
             Text("重置新手引导")
+                .font(AppTypography.caption)
+                .foregroundStyle(AppColors.secondaryText(for: colorScheme))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing.sm)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var debugClearHistoryButton: some View {
+        Button {
+            appState.clearSessionHistoryForDebug()
+        } label: {
+            Text("清除历史记录")
                 .font(AppTypography.caption)
                 .foregroundStyle(AppColors.secondaryText(for: colorScheme))
                 .frame(maxWidth: .infinity)
