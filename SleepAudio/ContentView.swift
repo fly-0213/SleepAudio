@@ -23,11 +23,13 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ContentView()
+                .environmentObject(AppContainer())
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
                 .previewDisplayName("主界面")
 
             ContentView()
+                .environmentObject(AppContainer())
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
                 .preferredColorScheme(.dark)

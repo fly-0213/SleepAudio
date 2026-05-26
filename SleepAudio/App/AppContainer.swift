@@ -7,18 +7,25 @@
 //
 
 import Foundation
+import Combine
 
-final class AppContainer {
+final class AppContainer: ObservableObject {
     let appState: AppState
     let router: AppRouter
     let settingsStore: SettingsStore
+    let sleepDetectionService: any SleepDetecting
+    let audioManager: any AudioManaging
 
     init(
         settingsStore: SettingsStore = SettingsStore(),
-        router: AppRouter = AppRouter()
+        router: AppRouter = AppRouter(),
+        sleepDetectionService: any SleepDetecting = MockSleepDetectionService(),
+        audioManager: any AudioManaging = MockAudioManager()
     ) {
         self.settingsStore = settingsStore
         self.appState = AppState(settingsStore: settingsStore)
         self.router = router
+        self.sleepDetectionService = sleepDetectionService
+        self.audioManager = audioManager
     }
 }

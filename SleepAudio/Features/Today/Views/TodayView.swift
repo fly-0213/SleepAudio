@@ -6,9 +6,21 @@
 import SwiftUI
 
 struct TodayView: View {
-    @StateObject private var viewModel = TodayViewModel()
+    @StateObject private var viewModel: TodayViewModel
     @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var colorScheme
+
+    init(
+        sleepDetectionService: any SleepDetecting = MockSleepDetectionService(),
+        audioManager: any AudioManaging = MockAudioManager()
+    ) {
+        _viewModel = StateObject(
+            wrappedValue: TodayViewModel(
+                sleepDetectionService: sleepDetectionService,
+                audioManager: audioManager
+            )
+        )
+    }
 
     var body: some View {
         ZStack {
@@ -20,21 +32,28 @@ struct TodayView: View {
                     header
 
                     DayNightSceneView(
-                        mode: viewModel.mode,
+                        mode: viewModel.sceneMode,
                         companionProfile: appState.selectedCompanionProfile,
-                        companionSpeech: viewModel.mode.companionSpeech,
-                        isResting: viewModel.isSleepIntentActive
+                        companionSpeech: viewModel.companionSpeech,
+                        isResting: viewModel.isResting
                     )
 
                     SleepActionPanel(
                         defaultAudioSource: appState.selectedAudioSource.displayName,
                         morningFadeIn: appState.morningPlaybackSettings.fadeInDuration.displayName,
                         nightPauseMode: appState.nightPauseSettings.timingPreference.displayName,
+                        statusTitle: viewModel.sleepDetectionState == .idle ? nil : viewModel.statusTitle,
+                        statusMessage: viewModel.sleepDetectionState == .idle ? nil : viewModel.statusMessage,
+                        resultTitle: viewModel.resultTitle,
                         buttonTitle: viewModel.primaryButtonTitle,
-                        buttonIcon: viewModel.primaryButtonIcon
+                        buttonIcon: viewModel.primaryButtonIcon,
+                        isPrimaryDisabled: viewModel.shouldDisablePrimaryButton,
+                        endButtonTitle: viewModel.shouldShowEndButton ? "结束守候" : nil
                     ) {
+                        handlePrimaryAction()
+                    } endAction: {
                         withAnimation(.easeInOut(duration: 0.22)) {
-                            viewModel.startSleepIntentPreview()
+                            viewModel.endNightFlow()
                         }
                     }
                 }
@@ -47,15 +66,25 @@ struct TodayView: View {
             .navigationBarTitleDisplayMode(.inline)
     }
 
+    private func handlePrimaryAction() {
+        withAnimation(.easeInOut(duration: 0.22)) {
+            if viewModel.sleepDetectionState == .ended {
+                viewModel.resetToIdle()
+            } else {
+                viewModel.startNightFlow(audioSource: appState.selectedAudioSource)
+            }
+        }
+    }
+
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                Text(viewModel.mode.title)
+                Text(viewModel.headerTitle)
                     .font(AppTypography.title1)
                     .foregroundStyle(AppColors.primaryText(for: colorScheme))
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text(viewModel.mode.subtitle)
+                Text(viewModel.headerSubtitle)
                     .font(AppTypography.body)
                     .foregroundStyle(AppColors.secondaryText(for: colorScheme))
             }

@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @EnvironmentObject private var container: AppContainer
     @EnvironmentObject private var router: AppRouter
 
     var body: some View {
@@ -39,7 +40,10 @@ struct MainTabView: View {
 
     private var todayStack: some View {
         NavigationStack(path: $router.todayPath) {
-            TodayView()
+            TodayView(
+                sleepDetectionService: container.sleepDetectionService,
+                audioManager: container.audioManager
+            )
                 .navigationDestination(for: AppRoute.self) { route in
                     PlaceholderRouteView(route: route)
                 }
@@ -94,11 +98,13 @@ struct MainTabView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             MainTabView()
+                .environmentObject(AppContainer())
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
                 .previewDisplayName("主标签")
 
             MainTabView()
+                .environmentObject(AppContainer())
                 .environmentObject(AppState())
                 .environmentObject(AppRouter())
                 .preferredColorScheme(.dark)
