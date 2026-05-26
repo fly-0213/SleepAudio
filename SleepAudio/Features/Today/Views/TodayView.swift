@@ -7,6 +7,7 @@ import SwiftUI
 
 struct TodayView: View {
     @StateObject private var viewModel = TodayViewModel()
+    @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -20,14 +21,15 @@ struct TodayView: View {
 
                     DayNightSceneView(
                         mode: viewModel.mode,
+                        companionProfile: appState.selectedCompanionProfile,
                         companionSpeech: viewModel.mode.companionSpeech,
                         isResting: viewModel.isSleepIntentActive
                     )
 
                     SleepActionPanel(
-                        defaultAudioSource: viewModel.defaultAudioSource,
-                        morningFadeIn: viewModel.morningFadeIn,
-                        nightPauseMode: viewModel.nightPauseMode,
+                        defaultAudioSource: appState.selectedAudioSource.displayName,
+                        morningFadeIn: appState.morningPlaybackSettings.fadeInDuration.displayName,
+                        nightPauseMode: appState.nightPauseSettings.timingPreference.displayName,
                         buttonTitle: viewModel.primaryButtonTitle,
                         buttonIcon: viewModel.primaryButtonIcon
                     ) {

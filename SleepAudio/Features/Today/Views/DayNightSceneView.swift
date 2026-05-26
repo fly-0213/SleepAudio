@@ -7,6 +7,7 @@ import SwiftUI
 
 struct DayNightSceneView: View {
     let mode: AppMode
+    let companionProfile: CompanionProfile
     let companionSpeech: String
     let isResting: Bool
 
@@ -19,6 +20,7 @@ struct DayNightSceneView: View {
             symbol
             CompanionCharacterView(
                 mode: mode,
+                profile: companionProfile,
                 speech: companionSpeech,
                 isResting: isResting
             )
@@ -67,11 +69,21 @@ struct DayNightSceneView: View {
 struct DayNightSceneView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            DayNightSceneView(mode: .morning, companionSpeech: "早上好", isResting: false)
+            DayNightSceneView(
+                mode: .morning,
+                companionProfile: .female,
+                companionSpeech: "早上好",
+                isResting: false
+            )
                 .padding()
                 .background(AppColors.morningBackground)
 
-            DayNightSceneView(mode: .lateNight, companionSpeech: "我会安静陪着你", isResting: false)
+            DayNightSceneView(
+                mode: .lateNight,
+                companionProfile: .male,
+                companionSpeech: "我会安静陪着你",
+                isResting: false
+            )
                 .padding()
                 .background(AppColors.nightBackground)
                 .preferredColorScheme(.dark)

@@ -11,12 +11,14 @@ import Foundation
 final class AppContainer {
     let appState: AppState
     let router: AppRouter
+    let settingsStore: SettingsStore
 
     init(
-        appState: AppState = AppState(),
+        settingsStore: SettingsStore = SettingsStore(),
         router: AppRouter = AppRouter()
     ) {
-        self.appState = appState
+        self.settingsStore = settingsStore
+        self.appState = AppState(settingsStore: settingsStore)
         self.router = router
     }
 }

@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @EnvironmentObject private var appState: AppState
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -18,6 +19,7 @@ struct SettingsView: View {
                     header
                     settingsPlaceholder
                     emptyState
+                    debugResetButton
                 }
                 .padding(.horizontal, AppSpacing.pageHorizontal)
                 .padding(.top, AppSpacing.lg)
@@ -73,6 +75,19 @@ struct SettingsView: View {
             )
         }
     }
+
+    private var debugResetButton: some View {
+        Button {
+            appState.resetOnboardingForDebug()
+        } label: {
+            Text("重置新手引导")
+                .font(AppTypography.caption)
+                .foregroundStyle(AppColors.secondaryText(for: colorScheme))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing.sm)
+        }
+        .buttonStyle(.plain)
+    }
 }
 
 struct SettingsView_Previews: PreviewProvider {
@@ -81,10 +96,12 @@ struct SettingsView_Previews: PreviewProvider {
             NavigationStack {
                 SettingsView()
             }
+            .environmentObject(AppState())
 
             NavigationStack {
                 SettingsView()
             }
+            .environmentObject(AppState())
             .preferredColorScheme(.dark)
         }
     }

@@ -10,11 +10,6 @@ final class TodayViewModel: ObservableObject {
     @Published private(set) var mode: AppMode
     @Published private(set) var isSleepIntentActive = false
 
-    let companion = CompanionProfile.placeholder
-    let defaultAudioSource = "Spotify"
-    let morningFadeIn = "15 分钟"
-    let nightPauseMode = "平衡模式"
-
     init(date: Date = Date(), calendar: Calendar = .current) {
         mode = AppMode(date: date, calendar: calendar)
     }

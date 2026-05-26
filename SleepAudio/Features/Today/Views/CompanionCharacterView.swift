@@ -7,6 +7,7 @@ import SwiftUI
 
 struct CompanionCharacterView: View {
     let mode: AppMode
+    let profile: CompanionProfile
     let speech: String
     let isResting: Bool
 
@@ -43,7 +44,7 @@ struct CompanionCharacterView: View {
                     .overlay(alignment: .center) {
                         Image(systemName: isResting ? "eyes.inverse" : "face.smiling")
                             .font(.system(size: 22, weight: .regular))
-                            .foregroundStyle(AppColors.primaryText(for: colorScheme).opacity(0.74))
+                            .foregroundStyle(faceDetailColor)
                     }
 
                 RoundedRectangle(cornerRadius: AppRadius.lg, style: .continuous)
@@ -68,18 +69,32 @@ struct CompanionCharacterView: View {
     }
 
     private var characterBaseColor: Color {
-        mode.prefersDarkScene ? AppColors.accentCalmBlue : AppColors.accentMorning
+        switch profile.style {
+        case .male:
+            mode.prefersDarkScene ? AppColors.accentCalmBlue : Color(red: 0.49, green: 0.63, blue: 0.70)
+        case .female:
+            mode.prefersDarkScene ? Color(red: 0.70, green: 0.62, blue: 0.78) : AppColors.accentMorning
+        }
+    }
+
+    private var faceDetailColor: Color {
+        switch profile.style {
+        case .male:
+            AppColors.primaryText(for: colorScheme).opacity(0.78)
+        case .female:
+            Color(red: 0.42, green: 0.26, blue: 0.28).opacity(colorScheme == .dark ? 0.76 : 0.88)
+        }
     }
 }
 
 struct CompanionCharacterView_Previews: PreviewProvider {
     static var previews: some View {
         Group {
-            CompanionCharacterView(mode: .morning, speech: "早上好", isResting: false)
+            CompanionCharacterView(mode: .morning, profile: .female, speech: "早上好", isResting: false)
                 .padding()
                 .background(AppColors.morningBackground)
 
-            CompanionCharacterView(mode: .lateNight, speech: "晚安", isResting: true)
+            CompanionCharacterView(mode: .lateNight, profile: .male, speech: "晚安", isResting: true)
                 .padding()
                 .background(AppColors.nightBackground)
                 .preferredColorScheme(.dark)

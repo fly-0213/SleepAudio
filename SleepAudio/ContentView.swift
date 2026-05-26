@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject private var appState: AppState
+
     var body: some View {
-        MainTabView()
+        if appState.hasCompletedOnboarding {
+            MainTabView()
+        } else {
+            OnboardingFlowView()
+        }
     }
 }
 
